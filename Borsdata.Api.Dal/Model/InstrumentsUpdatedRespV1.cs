@@ -22,10 +22,6 @@ namespace Borsdata.Api.Dal.Model
         public List<InstrumentUpdatedV1> Instruments { get; set; }
 
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
         
     }
 

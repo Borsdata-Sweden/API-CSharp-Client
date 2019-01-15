@@ -29,10 +29,6 @@ namespace Borsdata.Api.Dal.Model
         public List<ReportR12V1> Reports { get; set; }
 
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
 
     }
 

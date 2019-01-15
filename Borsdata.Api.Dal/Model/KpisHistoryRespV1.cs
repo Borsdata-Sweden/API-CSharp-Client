@@ -22,10 +22,6 @@ namespace Borsdata.Api.Dal.Model
         public string PriceValue { get; set; }
         public List<KpiHistoryV1> Values { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
 
     }
 

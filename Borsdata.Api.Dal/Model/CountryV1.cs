@@ -20,10 +20,6 @@ namespace Borsdata.Api.Dal.Model
         public long? Id { get; set; }
         public string Name { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
         
     }
 

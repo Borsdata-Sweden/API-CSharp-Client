@@ -16,9 +16,5 @@ namespace Borsdata.Api.Dal.Model
     {
         public List<SectorV1> Sectors { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
     }
 }

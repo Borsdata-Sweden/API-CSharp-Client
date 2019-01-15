@@ -19,10 +19,6 @@ namespace Borsdata.Api.Dal.Model
        
         public List<MarketV1> Markets { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
         
     }
 

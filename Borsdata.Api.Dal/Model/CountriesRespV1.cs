@@ -18,11 +18,7 @@ namespace Borsdata.Api.Dal.Model
 
         public List<CountryV1> Countries { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
-        
+
     }
 
 }

@@ -109,10 +109,6 @@ namespace Borsdata.Api.Dal.Model
         [JsonProperty(PropertyName = "report_End_Date")]
         public DateTime? ReportEndDate { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
     }
 
 }

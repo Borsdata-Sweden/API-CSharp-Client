@@ -18,10 +18,6 @@ namespace Borsdata.Api.Dal.Model
         public long? Instrument { get; set; }
         public List<StockPriceV1> StockPricesList { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
     }
 
 }

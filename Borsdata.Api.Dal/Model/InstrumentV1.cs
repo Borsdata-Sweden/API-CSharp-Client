@@ -51,10 +51,6 @@ namespace Borsdata.Api.Dal.Model
         }
 
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
         
     }
 

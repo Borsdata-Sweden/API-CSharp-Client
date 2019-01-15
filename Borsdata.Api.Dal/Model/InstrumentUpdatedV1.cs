@@ -17,10 +17,6 @@ namespace Borsdata.Api.Dal.Model
         public long? InsId { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
         
     }
 

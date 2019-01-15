@@ -21,9 +21,5 @@ namespace Borsdata.Api.Dal.Model
         public long? Instrument { get; set; }
         public List<ReportYearV1> Reports { get; set; }
 
-        public virtual string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
-        }
     }
 }
