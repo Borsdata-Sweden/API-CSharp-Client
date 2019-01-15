@@ -22,9 +22,8 @@ namespace Borsdata.Api.Dal
 
         public ApiClient()
         {
-            //_urlParameters = "?authKey=<API KEY>";
-            _urlParameters = "?authKey=3b0dad5bca1f44d4b3510b9bbf52e3e5";
-
+            _urlParameters = "?authKey=<API KEY>";
+        
             _timer = Stopwatch.StartNew();
         }
 
