@@ -14,9 +14,9 @@ using Newtonsoft.Json;
 namespace Borsdata.Api.Dal.Model
 {
    
-    public partial class InstrumentsUpdatedRespV1 
+    public partial class KpisCalcUpdatedRespV1
     {
-        public List<InstrumentUpdatedV1> Instruments { get; set; }
+        public DateTime kpisCalcUpdated { get; set; }
     }
 
 }

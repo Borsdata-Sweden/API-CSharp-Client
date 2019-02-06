@@ -12,26 +12,34 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 
+
+/// <summary>
+/// Sample class to call Borsdata API V1.
+/// The ratelimit logic only work with single thread.
+/// </summary>
 namespace Borsdata.Api.Dal
 {
     public class ApiClient : IDisposable
     {
-        HttpClient _client;
-        string _urlParameters;
-        Stopwatch _timer;
+        HttpClient _client; 
+        string _authKey;                // Querystring authKey
+        Stopwatch _timer;               // Check time from last Api call to check Ratelimit
+        string _urlRoot;
 
-        public ApiClient()
+        public ApiClient(string apiKey)
         {
-            _urlParameters = "?authKey=<API KEY>";
-        
+            _authKey = "?authKey="+ apiKey;
+
             _timer = Stopwatch.StartNew();
+            _urlRoot = "https://apiservice.borsdata.se/";
         }
 
 
+        /// <summary> Return list of all instruments</summary>
         public InstrumentRespV1 GetInstruments()
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/instruments/");
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot+"/v1/instruments/");
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -47,11 +55,12 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-        public ReportsYearRespV1 GetReportsYear(long borsdataId)
+        /// <summary> Return Full Year reports for one instrument (max 10 reports)</summary>
+        public ReportsYearRespV1 GetReportsYear(long instrumentId)
         {
          
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/instruments/{0}/reports/year", borsdataId);
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot+"/v1/instruments/{0}/reports/year", instrumentId);
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -67,11 +76,12 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-        public ReportsR12RespV1 GetReportsR12(long borsdataId)
+        /// <summary> Return R12 reports (Rolling 12Month => Sum of last four quarter reports) for one instrument (max 10 reports)</summary>
+        public ReportsR12RespV1 GetReportsR12(long instrumentId)
         {
 
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/instruments/{0}/reports/r12", borsdataId);
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot+"/v1/instruments/{0}/reports/r12", instrumentId);
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -87,11 +97,12 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-        public ReportsQuarterRespV1 GetReportsQuarter(long borsdataId)
+        /// <summary> Return Quarter reports (Normaly data for last 3 month) for one instrument (max 10 reports)</summary>
+        public ReportsQuarterRespV1 GetReportsQuarter(long instrumentId)
         {
 
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/instruments/{0}/reports/quarter", borsdataId);
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot+"/v1/instruments/{0}/reports/quarter", instrumentId);
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -107,11 +118,12 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-
-        public StockPricesRespV1 GetStockPrices(long borsdataId)
+        /// <summary> Return EndDay stockprice for one Instrument (max 10 year history)</summary>
+        public StockPricesRespV1 GetStockPrices(long instrumentId)
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/instruments/{0}/stockprices", borsdataId);
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+
+            string url = string.Format(_urlRoot+"/v1/instruments/{0}/stockprices", instrumentId);
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -127,14 +139,12 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-
-        public StockPricesRespV1 GetStockPrices(long borsdataId, DateTime from, DateTime to)
+        /// <summary> Return EndDay stockprice for one Instrument (max 10 year history)</summary>
+        public StockPricesRespV1 GetStockPrices(long instrumentId, DateTime from, DateTime to)
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/instruments/{0}/stockprices", borsdataId);
-            string urlPar = string.Format(_urlParameters + "&from={0}&to={1}", from.ToShortDateString(), to.ToShortDateString());
+            string url = string.Format(_urlRoot + "/v1/instruments/{0}/stockprices", instrumentId);
+            string urlPar = string.Format(_authKey + "&from={0}&to={1}", from.ToShortDateString(), to.ToShortDateString());
             HttpResponseMessage response = WebbCall(url, urlPar);
-
-
 
             if (response.IsSuccessStatusCode)
             {
@@ -150,12 +160,21 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-
-        public KpisHistoryRespV1 GetKpiHistory(long borsdataId, int KpiId, ReportType rt, PriceType pt)
+        /// <summary>
+        /// Some KPIs has history.
+        /// See list of KPI and how to call on github
+        /// https://github.com/Borsdata-Sweden/API/wiki/KPI-History
+        /// </summary>
+        /// <param name="instrumentId">Company Ericsson has instrumentId=77</param>
+        /// <param name="KpiId">KPI id. P/E =2</param>
+        /// <param name="rt"> What report is KPI calculated with? [year, r12, quarter]</param>
+        /// <param name="pt">What stockprice is KPI calculated with? [mean, high, low]</param>
+        /// <returns>List of historical KPI values</returns>
+        public KpisHistoryRespV1 GetKpiHistory(long instrumentId, int KpiId, ReportType rt, PriceType pt)
         {
 
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/Instruments/{0}/kpis/{1}/{2}/{3}/history", borsdataId, KpiId, rt.ToString(), pt.ToString());
-            string urlPar = string.Format(_urlParameters);
+            string url = string.Format(_urlRoot + "/v1/Instruments/{0}/kpis/{1}/{2}/{3}/history", instrumentId, KpiId, rt.ToString(), pt.ToString());
+            string urlPar = string.Format(_authKey);
             HttpResponseMessage response = WebbCall(url, urlPar);
 
             if (response.IsSuccessStatusCode)
@@ -172,11 +191,19 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-
-        public KpisRespV1 GetKpiScreenerSingle(long borsdataId, int KpiId, string rt, PriceType pt)
+        /// <summary>
+        /// Screener kpis. Return one datapoint for one Intrument.
+        /// You can find exact API Url on Borsdata screener in the KPI window and [API URL] button.
+        /// </summary>
+        /// <param name="instrumentId">Company Ericsson has instrumentId=77</param>
+        /// <param name="KpiId">KPI id</param>
+        /// <param name="time">Time period for the KPI</param>
+        /// <param name="calc">Calculation format.</param>
+        /// <returns></returns>
+        public KpisRespV1 GetKpiScreenerSingle(long instrumentId, int KpiId, string time, string calc)
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/Instruments/{0}/kpis/{1}/{2}/{3}", borsdataId, KpiId, rt.ToString(), pt.ToString());
-            string urlPar = string.Format(_urlParameters);
+            string url = string.Format(_urlRoot + "/v1/Instruments/{0}/kpis/{1}/{2}/{3}", instrumentId, KpiId, time, calc);
+            string urlPar = string.Format(_authKey);
             HttpResponseMessage response = WebbCall(url, urlPar);
 
             if (response.IsSuccessStatusCode)
@@ -195,11 +222,19 @@ namespace Borsdata.Api.Dal
 
 
 
-        public KpisAllCompRespV1 GetKpiScreener(int KpiId, string rt, PriceType pt)
+        /// <summary>
+        /// Screener kpis. Return List of datapoints for all Intrument.
+        /// You can find exact API Url on Borsdata screener in the KPI window and [API URL] button.
+        /// </summary>
+        /// <param name="KpiId">KPI id</param>
+        /// <param name="time">Time period for the KPI</param>
+        /// <param name="calc">Calculation format</param>
+        /// <returns></returns>
+        public KpisAllCompRespV1 GetKpiScreener(int KpiId, string time, string calc)
         {
 
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/instruments/kpis/{0}/{1}/{2}", KpiId, rt.ToString(), pt.ToString());
-            string urlPar = string.Format(_urlParameters);
+            string url = string.Format(_urlRoot + "/v1/instruments/kpis/{0}/{1}/{2}", KpiId, time, calc);
+            string urlPar = string.Format(_authKey);
             HttpResponseMessage response = WebbCall(url, urlPar);
 
             if (response.IsSuccessStatusCode)
@@ -219,8 +254,8 @@ namespace Borsdata.Api.Dal
 
         public MarketsRespV1 GetMarkets()
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/markets/");
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot + "/v1/markets");
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -239,8 +274,8 @@ namespace Borsdata.Api.Dal
 
         public SectorsRespV1 GetSectors()
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/sectors/");
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot + "/v1/sectors");
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -259,8 +294,8 @@ namespace Borsdata.Api.Dal
 
         public CountriesRespV1 GetCountries()
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/countries/");
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot + "/v1/countries");
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -279,8 +314,8 @@ namespace Borsdata.Api.Dal
 
         public BranchesRespV1 GetBranches()
         {
-            string url = string.Format("http://bdapidev.azurewebsites.net/api/v1/branches/");
-            HttpResponseMessage response = WebbCall(url, _urlParameters);
+            string url = string.Format(_urlRoot + "/v1/branches");
+            HttpResponseMessage response = WebbCall(url, _authKey);
 
             if (response.IsSuccessStatusCode)
             {
@@ -297,22 +332,80 @@ namespace Borsdata.Api.Dal
         }
 
 
-        HttpResponseMessage WebbCall(string url, string urlParameters)
+        /// <summary>
+        /// Return last 100 instruments with changed data or where reports is updated.
+        /// </summary>
+        /// <returns></returns>
+        public InstrumentsUpdatedRespV1 GetInstrumentsUpdated()
+        {
+            string url = string.Format(_urlRoot + "/v1/instruments/updated");
+            HttpResponseMessage response = WebbCall(url, _authKey);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string json = response.Content.ReadAsStringAsync().Result;
+                InstrumentsUpdatedRespV1 res = JsonConvert.DeserializeObject<InstrumentsUpdatedRespV1>(json);
+                return res;
+            }
+            else
+            {
+                Console.WriteLine("GetInstrumentsUpdated {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Return last time the Kpis was recalculated.
+        /// Normaly this is at night after report and Stockprices is updated.
+        /// But can also be during day when new reports is added.
+        /// </summary>
+        /// <returns></returns>
+        public KpisCalcUpdatedRespV1 GetKpisCalcUpdated()
+        {
+            string url = string.Format(_urlRoot + "/v1/instruments/kpis/updated");
+            HttpResponseMessage response = WebbCall(url, _authKey);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string json = response.Content.ReadAsStringAsync().Result;
+                KpisCalcUpdatedRespV1 res = JsonConvert.DeserializeObject<KpisCalcUpdatedRespV1>(json);
+                return res;
+            }
+            else
+            {
+                Console.WriteLine("GetKpisCalcUpdated {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+            }
+
+            return null;
+        }
+
+
+
+
+        /// <summary>
+        /// Combine URL and Querystring. Check if need to sleep (Ratelimit). Then call API.
+        /// It try call API 2 times if Ratelimit is hit.
+        /// </summary>
+        /// <param name="url">API url</param>
+        /// <param name="querystring">Querystring</param>
+        /// <returns></returns>
+        HttpResponseMessage WebbCall(string url, string querystring)
         {
             _client = new HttpClient();
             _client.BaseAddress = new Uri(url);
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             SleepBeforeNewApiCall(); // Sleep if needed to avoid RateLimit
-            HttpResponseMessage response = _client.GetAsync(urlParameters).Result;
+            HttpResponseMessage response = _client.GetAsync(querystring).Result; // Call API
 
-            Console.WriteLine(url + " " + urlParameters);
+            Console.WriteLine(url + " " + querystring);
 
-            if ((int)response.StatusCode == 429) // We still get RateLimit error. Sleep more
+            if ((int)response.StatusCode == 429) // We still get RateLimit error. Sleep more. 
             {
-                //Console.WriteLine("StatusCode == 429.. Sleep!!");
+                //Console.WriteLine("StatusCode == 429.. Sleep more!!");
                 System.Threading.Thread.Sleep(500);
-                response = _client.GetAsync(urlParameters).Result;
+                response = _client.GetAsync(querystring).Result; // Call API second time!
             }
 
             return response;
@@ -320,7 +413,9 @@ namespace Borsdata.Api.Dal
 
 
         /// <summary>
-        /// Check if the time sice last API call is less than 500ms. Then sleep to avoid RateLimit.
+        /// Ratelimit to API is 2 req/Sec.
+        /// Check if the time sice last API call is less than 500ms. 
+        /// Then sleep to avoid RateLimit 429.
         /// </summary>
         void SleepBeforeNewApiCall()
         {

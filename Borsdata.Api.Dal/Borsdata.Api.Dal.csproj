@@ -47,12 +47,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiClient.cs" />
+    <Compile Include="Infrastructure\CalcType.cs" />
     <Compile Include="Infrastructure\Instrument.cs" />
     <Compile Include="Infrastructure\PriceType.cs" />
     <Compile Include="Infrastructure\ReportType.cs" />
+    <Compile Include="Infrastructure\TimeType.cs" />
     <Compile Include="Model\BranchesRespV1.cs" />
     <Compile Include="Model\BranchV1.cs" />
     <Compile Include="Model\InstrumentsRespV1.cs" />
+    <Compile Include="Model\KpisCalcUpdatedRespV1.cs" />
     <Compile Include="Model\InstrumentsUpdatedRespV1.cs" />
     <Compile Include="Model\InstrumentUpdatedV1.cs" />
     <Compile Include="Model\InstrumentV1.cs" />
