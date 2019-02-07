@@ -7,7 +7,7 @@ If you dont have an API Key, you need to Apply for an API key on [Börsdata webb
 You need to be a Pro member to get Access to API.
 
 # How to get started with Client
-Download project and open in VisualStudio 2017.  
+Download project and open in [VisualStudio 2017 or Community](https://visualstudio.microsoft.com/downloads/#DownloadFamilies_2).    
 In Program.cs you replace xxxx with your uniqe API Key.
 
 
