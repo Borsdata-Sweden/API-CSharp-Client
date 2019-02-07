@@ -13,12 +13,9 @@ using Newtonsoft.Json;
 namespace Borsdata.Api.Dal.Model
 {
 
-    public partial class InstrumentRespV1 
+    public partial class StockSplitRespV1
     {
-  
-        public List<InstrumentV1> Instruments { get; set; }
-
-      
+        public List<StockSplitV1> stockSplitList { get; set; }
     }
 
 }

@@ -20,11 +20,12 @@ namespace Borsdata.Api.SimpleClient
 {
     class Program 
     {
-        static string _apiKey = "xxxxxxx"; // Add your Api Key. 
+        static string _apiKey = "xxxxx"; // Add your Api Key. 
 
         static void Main(string[] args)
         {
             Console.WriteLine("Start Test Client!!");
+
             StockPricesForAllInstruments();
 
             // InstrumentsWithMetadata();
@@ -33,6 +34,7 @@ namespace Borsdata.Api.SimpleClient
             // Kpis();
             // InstrumentsUpdated();
             // KpisUpdated();
+            // GetStockSplits();
 
             Console.ReadKey();
         }
@@ -174,6 +176,17 @@ namespace Borsdata.Api.SimpleClient
             KpisCalcUpdatedRespV1 kpisUpdated = api.GetKpisCalcUpdated();
             Console.WriteLine("Updated time: " + kpisUpdated.kpisCalcUpdated.ToLongDateString());
         }
+
+        // Get list of Instruments with StockSplit. 
+        static void GetStockSplits()
+        {
+            ApiClient api = new ApiClient(_apiKey);
+
+            StockSplitRespV1 splits = api.GetStockSplits();
+            Console.WriteLine("StockSplits count: " + splits.stockSplitList.Count());
+        }
+
+        
 
     }
 

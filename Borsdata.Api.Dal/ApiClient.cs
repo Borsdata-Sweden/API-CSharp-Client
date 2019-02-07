@@ -381,6 +381,29 @@ namespace Borsdata.Api.Dal
         }
 
 
+        // Return list of Instruments with StockSplit. 
+        // StockSplit affects all historical stockprices, reportdata and Kpis for this instrument.
+        public StockSplitRespV1 GetStockSplits()
+        {
+            string url = string.Format(_urlRoot + "/v1/instruments/StockSplits");
+            HttpResponseMessage response = WebbCall(url, _authKey);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string json = response.Content.ReadAsStringAsync().Result;
+                StockSplitRespV1 res = JsonConvert.DeserializeObject<StockSplitRespV1>(json);
+                return res;
+            }
+            else
+            {
+                Console.WriteLine("GetStockSplits {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+            }
+
+            return null;
+        }
+
+
+
 
 
         /// <summary>
