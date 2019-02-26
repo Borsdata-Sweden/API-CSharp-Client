@@ -15,6 +15,11 @@ namespace Borsdata.Api.Dal.Model
 {
     public partial class ReportYearV1
     {
+        [JsonProperty(PropertyName = "year")]
+        public int Year { get; set; }
+
+        [JsonProperty(PropertyName = "period")]
+        public int Period { get; set; }
 
         [JsonProperty(PropertyName = "revenues")]  
         public double? Revenues { get; set; }
@@ -100,8 +105,8 @@ namespace Borsdata.Api.Dal.Model
         [JsonProperty(PropertyName = "stock_Price_Low")]
         public double? StockPriceLow { get; set; }
 
-       // [JsonProperty(PropertyName = "currency")]
-       // public string Currency { get; set; } 
+        [JsonProperty(PropertyName = "currency")]
+         public string Currency { get; set; } 
 
         [JsonProperty(PropertyName = "report_Start_Date")]
         public DateTime? ReportStartDate { get; set; }
@@ -109,6 +114,8 @@ namespace Borsdata.Api.Dal.Model
         [JsonProperty(PropertyName = "report_End_Date")]
         public DateTime? ReportEndDate { get; set; }
 
+        [JsonProperty(PropertyName = "broken_Fiscal_Year")]
+        public bool Broken_Fiscal_Year { get; set; }
     }
 
 }

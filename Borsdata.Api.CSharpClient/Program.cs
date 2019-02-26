@@ -6,21 +6,14 @@
 using Borsdata.Api.Dal;
 using Borsdata.Api.Dal.Infrastructure;
 using Borsdata.Api.Dal.Model;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Borsdata.Api.SimpleClient
 {
     class Program 
     {
-        static string _apiKey = "xxxxx"; // Add your Api Key. 
+        static string _apiKey = "xxxx"; // Add your Api Key. 
 
         static void Main(string[] args)
         {
@@ -30,7 +23,10 @@ namespace Borsdata.Api.SimpleClient
 
             // InstrumentsWithMetadata();
             // StockPricesTimeRange();
+
             // Reports();
+            // LatestPE();
+
             // Kpis();
             // InstrumentsUpdated();
             // KpisUpdated();
@@ -127,6 +123,7 @@ namespace Borsdata.Api.SimpleClient
         static void Reports()
         {
             ApiClient api = new ApiClient(_apiKey);
+
             ReportsYearRespV1 rY = api.GetReportsYear(3);
             Console.WriteLine("rY count: " + rY.Reports.Count());
 
@@ -137,6 +134,25 @@ namespace Borsdata.Api.SimpleClient
             Console.WriteLine("rQ count: " + rQ.Reports.Count());
 
         }
+
+        // Calc latest P/E for HM
+        static void LatestPE()
+        {
+            ApiClient api = new ApiClient(_apiKey);
+            int insId = 97; // HM
+
+            StockPricesRespV1 spResp = api.GetStockPrices(insId, DateTime.Today.AddDays(-7), DateTime.Today); // We need lastest price. Ask for one week back.
+            StockPriceV1 lastSp = spResp.StockPricesList.Last(); // First in list in latest stockprice. (Order Asc)
+
+            ReportsR12RespV1 r12 = api.GetReportsR12(insId);
+            ReportR12V1 lastReport = r12.Reports.First(); // Get last R12 report (Desc)
+
+            var pe = lastSp.C / lastReport.EarningsPerShare;
+            Console.WriteLine("Lastest R12 P/E is : " + pe);
+        }
+
+
+
 
 
         // Get list of last 100 updated Instrument where Instrument data or Instrument Reports is changed.
