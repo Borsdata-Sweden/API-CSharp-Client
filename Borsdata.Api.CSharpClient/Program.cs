@@ -13,14 +13,16 @@ namespace Borsdata.Api.SimpleClient
 {
     class Program 
     {
-        static string _apiKey = "xxxx"; // Add your Api Key. 
 
+        static string _apiKey = "xxxx"; // Add your Api Key. 
+      
         static void Main(string[] args)
         {
             Console.WriteLine("Start Test Client!!");
 
-            StockPricesForAllInstruments();
+            LastStockPricesForAllInstruments();
 
+            // StockPricesForAllInstruments();
             // InstrumentsWithMetadata();
             // StockPricesTimeRange();
 
@@ -102,6 +104,19 @@ namespace Borsdata.Api.SimpleClient
         }
 
 
+        static void LastStockPricesForAllInstruments()
+        {
+            ApiClient api = new ApiClient(_apiKey);
+
+            StockPricesLastRespV1 spList = api.GetStockpricesLast();
+
+ 
+            foreach (var sp in spList.StockPricesList)
+            {
+                //print InsID : closeprice
+                Console.WriteLine(sp.I + " : " + sp.C);
+            }
+        }
 
 
 
@@ -124,14 +139,22 @@ namespace Borsdata.Api.SimpleClient
         {
             ApiClient api = new ApiClient(_apiKey);
 
+            // One call to get all report for one Instrument
+            ReportsRespV1 rAll = api.GetReports(3);
+            Console.WriteLine("Year count: " + rAll.ReportsYear.Count());
+            Console.WriteLine("R12 count: " + rAll.ReportsR12.Count());
+            Console.WriteLine("Quarter count: " + rAll.ReportsQuarter.Count());
+
+
+            // You can also get list of reports for each Year, R12, Quarter 
             ReportsYearRespV1 rY = api.GetReportsYear(3);
-            Console.WriteLine("rY count: " + rY.Reports.Count());
+            Console.WriteLine("Year count: " + rY.Reports.Count());
 
             ReportsR12RespV1 r12 = api.GetReportsR12(3);
             Console.WriteLine("r12 count: " + r12.Reports.Count());
 
             ReportsQuarterRespV1 rQ = api.GetReportsQuarter(3);
-            Console.WriteLine("rQ count: " + rQ.Reports.Count());
+            Console.WriteLine("Quarter count: " + rQ.Reports.Count());
 
         }
 

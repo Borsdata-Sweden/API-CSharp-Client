@@ -55,6 +55,28 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
+
+        // Return list of all reports for one Instrument
+        public ReportsRespV1 GetReports(long instrumentId)
+        {
+            string url = string.Format(_urlRoot + "/v1/instruments/{0}/reports", instrumentId);
+            HttpResponseMessage response = WebbCall(url, _authKey);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string json = response.Content.ReadAsStringAsync().Result;
+                ReportsRespV1 res = JsonConvert.DeserializeObject<ReportsRespV1>(json);
+                return res;
+            }
+            else
+            {
+                Console.WriteLine("GetReports {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+            }
+
+            return null;
+        }
+
+
         /// <summary> Return Full Year reports for one instrument (max 10 reports)</summary>
         public ReportsYearRespV1 GetReportsYear(long instrumentId)
         {
@@ -397,6 +419,27 @@ namespace Borsdata.Api.Dal
             else
             {
                 Console.WriteLine("GetStockSplits {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+            }
+
+            return null;
+        }
+
+
+        // Return list of last Stockprice for all Instruments 
+        public StockPricesLastRespV1 GetStockpricesLast()
+        {
+            string url = string.Format(_urlRoot + "/v1/instruments/stockprices/last");
+            HttpResponseMessage response = WebbCall(url, _authKey);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string json = response.Content.ReadAsStringAsync().Result;
+                StockPricesLastRespV1 res = JsonConvert.DeserializeObject<StockPricesLastRespV1>(json);
+                return res;
+            }
+            else
+            {
+                Console.WriteLine("GetStockpricesLast {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
             }
 
             return null;
