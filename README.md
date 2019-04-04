@@ -11,6 +11,17 @@ Download project and open in [VisualStudio 2017 or Community](https://visualstud
 In Program.cs you replace xxxx with your uniqe API Key.
 
 
+
+# Updates
+2019-04-04  
+-Add new API call to get list of Last Stockprice for all Instruments.  
+(No need to call all Instruments to get last stockprices on daily basis. One call insted of +1600)
+  
+-Add new API call to get all reports for one Instrument.  
+(To get Year, R12, Quarter Reports you only need one call)
+
+
+
 Happy coding!  
 
 
