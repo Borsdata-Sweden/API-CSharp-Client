@@ -28,7 +28,7 @@ namespace Borsdata.Api.Dal
 
         public ApiClient(string apiKey)
         {
-            _authKey = "?authKey="+ apiKey;
+            _authKey = "?authKey="+ apiKey + "&maxcount=20";
 
             _timer = Stopwatch.StartNew();
             _urlRoot = "https://apiservice.borsdata.se/";

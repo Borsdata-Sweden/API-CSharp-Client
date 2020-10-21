@@ -3,6 +3,14 @@
 // Börsdata cannot guarantee or imply reliability, serviceability, or function of these programs.
 // All programs contained herein are provided to you “AS IS” without any warranties of any kind. 
 
+
+// -------------------
+// Update 2020-10-21
+// Added maxcount for 20 years data
+// Added new Report values
+// -------------------
+
+
 using Borsdata.Api.Dal;
 using Borsdata.Api.Dal.Infrastructure;
 using Borsdata.Api.Dal.Model;
@@ -14,25 +22,31 @@ namespace Borsdata.Api.SimpleClient
     class Program 
     {
 
-        static string _apiKey = "xxxx"; // Add your Api Key. 
+        static string _apiKey = "xxx"; // Add your Api Key. 
       
         static void Main(string[] args)
         {
             Console.WriteLine("Start Test Client!!");
 
-            LastStockPricesForAllInstruments();
+            StockPricesForOneInstruments(3); // Get stockprices for ABB (InsId=3)
 
-            // StockPricesForAllInstruments();
-            // InstrumentsWithMetadata();
-            // StockPricesTimeRange();
+            //LastStockPricesForAllInstruments();
 
-            // Reports();
-            // LatestPE();
+            //StockPricesForAllInstruments();
+            //InstrumentsWithMetadata();
+            //StockPricesTimeRange();
 
-            // Kpis();
-            // InstrumentsUpdated();
-            // KpisUpdated();
-            // GetStockSplits();
+            //Reports();
+            //LatestPE();
+
+            //HistoryKpi();
+            //ScreenerKpi();
+
+            //InstrumentsUpdated();
+            //KpisUpdated();
+            //GetStockSplits();
+
+
 
             Console.ReadKey();
         }
@@ -88,6 +102,23 @@ namespace Borsdata.Api.SimpleClient
         }
 
 
+        // Get stockprices one instrument
+        // 20 year history
+        static void StockPricesForOneInstruments(long InsId)
+        {
+            ApiClient api = new ApiClient(_apiKey);
+            StockPricesRespV1 spList = api.GetStockPrices(InsId);
+
+            foreach (var sp in spList.StockPricesList)
+            {
+                Console.WriteLine(sp.D + " : " + sp.C);
+            }
+        }
+
+
+
+        // 1. Call GetInstruments to get a list of all Instruments
+        // 2. Call GetStockPrices for each InsId
         static void StockPricesForAllInstruments()
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -96,6 +127,7 @@ namespace Borsdata.Api.SimpleClient
             // Get all stockprices for each Instrument
             foreach (var i in inst.Instruments)
             {
+                //--Get for a time range
                 //StockPricesRespV1 sp = api.GetStockPrices(i.InsId.Value, Convert.ToDateTime("2018-12-01"), DateTime.Today);
 
                 StockPricesRespV1 sp = api.GetStockPrices(i.InsId.Value);
@@ -159,6 +191,7 @@ namespace Borsdata.Api.SimpleClient
         }
 
         // Calc latest P/E for HM
+        // Sample to calc my own KPI
         static void LatestPE()
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -188,23 +221,33 @@ namespace Borsdata.Api.SimpleClient
 
 
         /// <summary>
-        /// Test get some Kpis
+        /// Test get some historical Kpis
+        /// This gives history values for one KPI
         /// </summary>
-        static void Kpis()
+        static void HistoryKpi()
         {
             ApiClient api = new ApiClient(_apiKey);
 
             // Get Historical Kpi Value for one Instrument and one Kpi (ABB=3, PE=2)
             var kpis = api.GetKpiHistory(3, 2, ReportType.year, PriceType.mean);
+        }
+
+        
+        static void ScreenerKpi()
+        {
+            ApiClient api = new ApiClient(_apiKey);
 
             // Get One kpi screener value for one Instrument. (HM=97, PE=2)
             var kpis2 = api.GetKpiScreenerSingle(97, 2, TimeType._15year, CalcType.mean);
+            Console.WriteLine("Single value from Screener :" + kpis2.Value.N + " / " + kpis2.Value.S);
 
+       
             // Get list of kpi Screener value for all Instruments. PE=2
-            var kpis3 = api.GetKpiScreener(2, TimeType._15year, CalcType.mean);
-
+            var kpis3 = api.GetKpiScreener(2, TimeType.last, CalcType.latest);
+            foreach (var kpi in kpis3.Values){
+                Console.WriteLine(kpi.I + " : " + kpi.N + " / " + kpi.S);
+            }
         }
-
 
 
         // Get datetime of last Kpis calculation.

@@ -119,6 +119,17 @@ namespace Borsdata.Api.Dal.Model
         public bool Broken_Fiscal_Year { get; set; }
 
 
+        // New propertys 2020-10-21
+        [JsonProperty(PropertyName = "currency_Ratio")]
+        public double? Currency_Ratio { get; set; }
+
+        [JsonProperty(PropertyName = "net_Sales")]
+        public double? Net_Sales { get; set; }
+
+        [JsonProperty(PropertyName = "report_Date")]
+        public DateTime Report_Date { get; set; }
+
+
     }
 
 }
