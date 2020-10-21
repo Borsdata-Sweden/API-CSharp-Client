@@ -20,7 +20,9 @@ In Program.cs you replace xxxx with your uniqe API Key.
 -Add new API call to get all reports for one Instrument.  
 (To get Year, R12, Quarter Reports you only need one call)
 
-
+2020-10-21 
+- Add new report values
+- Add 20 year history querystring
 
 Happy coding!  
 
