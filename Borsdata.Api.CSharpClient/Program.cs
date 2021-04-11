@@ -1,7 +1,7 @@
 // All sample code is provided for illustrative purposes only.
-// These examples have not been thoroughly tested under all conditions. 
+// These examples have not been thoroughly tested under all conditions.
 // Börsdata cannot guarantee or imply reliability, serviceability, or function of these programs.
-// All programs contained herein are provided to you “AS IS” without any warranties of any kind. 
+// All programs contained herein are provided to you “AS IS” without any warranties of any kind.
 
 
 // -------------------
@@ -19,11 +19,10 @@ using System.Linq;
 
 namespace Borsdata.Api.SimpleClient
 {
-    class Program 
+    class Program
     {
+        static string _apiKey = "xxx"; // Add your API Key.
 
-        static string _apiKey = "xxx"; // Add your Api Key. 
-      
         static void Main(string[] args)
         {
             Console.WriteLine("Start Test Client!!");
@@ -46,31 +45,25 @@ namespace Borsdata.Api.SimpleClient
             //KpisUpdated();
             //GetStockSplits();
 
-
-
             Console.ReadKey();
         }
 
-
-
-
-
-        // Get all Meta data about Instruments and connect data to Instrument Object.
+        /// <summary> Get all meta data about instruments and connect data to instrument object.</summary>
         static void InstrumentsWithMetadata()
         {
             ApiClient api = new ApiClient(_apiKey);
 
-            // get all Meta data
+            // Get all meta data
             CountriesRespV1 cr = api.GetCountries();
             BranchesRespV1 br = api.GetBranches();
             SectorsRespV1 sr = api.GetSectors();
             MarketsRespV1 mr = api.GetMarkets();
 
-            // Get all Instruments
+            // Get all instruments
             InstrumentRespV1 inst = api.GetInstruments();
 
-            // Connect Meta data to Instruments
-            foreach(InstrumentV1 c in inst.Instruments)
+            // Connect meta data to instruments
+            foreach (InstrumentV1 c in inst.Instruments)
             {
                 CountryV1 country = cr.Countries.FirstOrDefault(o => o.Id == c.CountryId);
                 c.CountryModel = country;
@@ -80,30 +73,30 @@ namespace Borsdata.Api.SimpleClient
 
 
                 BranchV1 Branch = br.Branches.FirstOrDefault(o => o.Id == c.BranchId);
-                c.BranchModel = Branch; 
+                c.BranchModel = Branch;
 
                 SectorV1 Sector = sr.Sectors.FirstOrDefault(o => o.Id == c.SectorId);
                 c.SectorModel = Sector;
             }
 
-            // Print Data to see all is ok
+            // Print data to see all is OK
             foreach (InstrumentV1 c in inst.Instruments)
             {
                 if (c.Instrument == Instrument.Index) // Index don't have any Branch or Sector
                 {
-                    Console.WriteLine(c.Name + " : " + c.CountryModel.Name + " : " + c.MarketModel.Name  );
+                    Console.WriteLine(c.Name + " : " + c.CountryModel.Name + " : " + c.MarketModel.Name);
                 }
                 else
                 {
                     Console.WriteLine(c.Name + " : " + c.CountryModel.Name + " : " + c.MarketModel.Name + " : " + c.BranchModel.Name + " : " + c.SectorModel.Name);
                 }
-                
             }
         }
 
-
-        // Get stockprices one instrument
-        // 20 year history
+        /// <summary>
+        /// Get stock prices for one instrument
+        /// 20 year history
+        /// </summary>
         static void StockPricesForOneInstruments(long InsId)
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -115,26 +108,25 @@ namespace Borsdata.Api.SimpleClient
             }
         }
 
-
-
-        // 1. Call GetInstruments to get a list of all Instruments
-        // 2. Call GetStockPrices for each InsId
+        /// <summary>
+        /// 1. Call GetInstruments to get a list of all instruments
+        /// 2. Call GetStockPrices for each InsId
+        /// </summary>
         static void StockPricesForAllInstruments()
         {
             ApiClient api = new ApiClient(_apiKey);
             InstrumentRespV1 inst = api.GetInstruments();
 
-            // Get all stockprices for each Instrument
+            // Get all stock prices for each instrument
             foreach (var i in inst.Instruments)
             {
                 //--Get for a time range
                 //StockPricesRespV1 sp = api.GetStockPrices(i.InsId.Value, Convert.ToDateTime("2018-12-01"), DateTime.Today);
 
                 StockPricesRespV1 sp = api.GetStockPrices(i.InsId.Value);
-                Console.WriteLine(DateTime.Now.ToLongTimeString() +  "  GetStockPrices() " + i.InsId.Value + " " + sp.StockPricesList.Count());
+                Console.WriteLine(DateTime.Now.ToLongTimeString() + "  GetStockPrices() " + i.InsId.Value + " " + sp.StockPricesList.Count());
             }
         }
-
 
         static void LastStockPricesForAllInstruments()
         {
@@ -142,7 +134,6 @@ namespace Borsdata.Api.SimpleClient
 
             StockPricesLastRespV1 spList = api.GetStockpricesLast();
 
- 
             foreach (var sp in spList.StockPricesList)
             {
                 //print InsID : closeprice
@@ -150,9 +141,7 @@ namespace Borsdata.Api.SimpleClient
             }
         }
 
-
-
-        // Stockprices in Time period for Company ABB => InsId=3
+        /// <summary> Stock prices in time period for company ABB => InsId=3 </summary>
         static void StockPricesTimeRange()
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -163,10 +152,7 @@ namespace Borsdata.Api.SimpleClient
             Console.WriteLine("sp3 count: " + sp3.StockPricesList.Count());
         }
 
-
-
-
-        //Get Reports for one company (ABB)
+        /// <summary> Get reports for one company (ABB) </summary>
         static void Reports()
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -177,8 +163,7 @@ namespace Borsdata.Api.SimpleClient
             Console.WriteLine("R12 count: " + rAll.ReportsR12.Count());
             Console.WriteLine("Quarter count: " + rAll.ReportsQuarter.Count());
 
-
-            // You can also get list of reports for each Year, R12, Quarter 
+            // You can also get list of reports for each Year, R12, Quarter
             ReportsYearRespV1 rY = api.GetReportsYear(3);
             Console.WriteLine("Year count: " + rY.Reports.Count());
 
@@ -190,15 +175,17 @@ namespace Borsdata.Api.SimpleClient
 
         }
 
-        // Calc latest P/E for HM
-        // Sample to calc my own KPI
+        /// <summary>
+        /// Calculate latest P/E for HM
+        /// Sample to calculate my own KPI
+        /// </summary>
         static void LatestPE()
         {
             ApiClient api = new ApiClient(_apiKey);
             int insId = 97; // HM
 
             StockPricesRespV1 spResp = api.GetStockPrices(insId, DateTime.Today.AddDays(-7), DateTime.Today); // We need lastest price. Ask for one week back.
-            StockPriceV1 lastSp = spResp.StockPricesList.Last(); // First in list in latest stockprice. (Order Asc)
+            StockPriceV1 lastSp = spResp.StockPricesList.Last(); // First in list in latest stock price. (Order asc)
 
             ReportsR12RespV1 r12 = api.GetReportsR12(insId);
             ReportR12V1 lastReport = r12.Reports.First(); // Get last R12 report (Desc)
@@ -207,11 +194,7 @@ namespace Borsdata.Api.SimpleClient
             Console.WriteLine("Lastest R12 P/E is : " + pe);
         }
 
-
-
-
-
-        // Get list of last 100 updated Instrument where Instrument data or Instrument Reports is changed.
+        /// <summary> Get list of last 100 updated instruments where instrument data or instrument reports is changed.</summary>
         static void InstrumentsUpdated()
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -219,47 +202,44 @@ namespace Borsdata.Api.SimpleClient
             Console.WriteLine("Updated count: " + resp.Instruments.Count());
         }
 
-
         /// <summary>
-        /// Test get some historical Kpis
+        /// Test get some historical KPIs
         /// This gives history values for one KPI
         /// </summary>
         static void HistoryKpi()
         {
             ApiClient api = new ApiClient(_apiKey);
 
-            // Get Historical Kpi Value for one Instrument and one Kpi (ABB=3, PE=2)
+            // Get historical KPI Value for one Instrument and one KPI (ABB=3, PE=2)
             var kpis = api.GetKpiHistory(3, 2, ReportType.year, PriceType.mean);
         }
 
-        
         static void ScreenerKpi()
         {
             ApiClient api = new ApiClient(_apiKey);
 
-            // Get One kpi screener value for one Instrument. (HM=97, PE=2)
+            // Get One KPI screener value for one Instrument. (HM=97, PE=2)
             var kpis2 = api.GetKpiScreenerSingle(97, 2, TimeType._15year, CalcType.mean);
             Console.WriteLine("Single value from Screener :" + kpis2.Value.N + " / " + kpis2.Value.S);
 
-       
-            // Get list of kpi Screener value for all Instruments. PE=2
+            // Get list of KPI screener value for all instruments. PE=2
             var kpis3 = api.GetKpiScreener(2, TimeType.last, CalcType.latest);
-            foreach (var kpi in kpis3.Values){
+            foreach (var kpi in kpis3.Values)
+            {
                 Console.WriteLine(kpi.I + " : " + kpi.N + " / " + kpi.S);
             }
         }
 
-
-        // Get datetime of last Kpis calculation.
+        /// <summary> Get datetime of last KPIs calculation.</summary>
         static void KpisUpdated()
         {
             ApiClient api = new ApiClient(_apiKey);
-   
+
             KpisCalcUpdatedRespV1 kpisUpdated = api.GetKpisCalcUpdated();
             Console.WriteLine("Updated time: " + kpisUpdated.kpisCalcUpdated.ToLongDateString());
         }
 
-        // Get list of Instruments with StockSplit. 
+        /// <summary> Get list of instruments with stock split.</summary>
         static void GetStockSplits()
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -267,9 +247,5 @@ namespace Borsdata.Api.SimpleClient
             StockSplitRespV1 splits = api.GetStockSplits();
             Console.WriteLine("StockSplits count: " + splits.stockSplitList.Count());
         }
-
-        
-
     }
-
 }

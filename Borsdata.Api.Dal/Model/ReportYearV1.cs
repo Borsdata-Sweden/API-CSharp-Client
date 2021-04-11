@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Linq;
 using System.IO;
@@ -21,19 +19,19 @@ namespace Borsdata.Api.Dal.Model
         [JsonProperty(PropertyName = "period")]
         public int Period { get; set; }
 
-        [JsonProperty(PropertyName = "revenues")]  
+        [JsonProperty(PropertyName = "revenues")]
         public double? Revenues { get; set; }
 
-        [JsonProperty(PropertyName = "gross_Income")] 
+        [JsonProperty(PropertyName = "gross_Income")]
         public double? GrossIncome { get; set; }
 
-        [JsonProperty(PropertyName = "operating_Income")] 
+        [JsonProperty(PropertyName = "operating_Income")]
         public double? OperatingIncome { get; set; }
 
-        [JsonProperty(PropertyName = "profit_Before_Tax")] 
+        [JsonProperty(PropertyName = "profit_Before_Tax")]
         public double? ProfitBeforeTax { get; set; }
 
-        [JsonProperty(PropertyName = "profit_To_Equity_Holders")] 
+        [JsonProperty(PropertyName = "profit_To_Equity_Holders")]
         public double? ProfitToEquityHolders { get; set; }
 
         [JsonProperty(PropertyName = "earnings_Per_Share")]
@@ -106,7 +104,7 @@ namespace Borsdata.Api.Dal.Model
         public double? StockPriceLow { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
-         public string Currency { get; set; } 
+         public string Currency { get; set; }
 
         [JsonProperty(PropertyName = "report_Start_Date")]
         public DateTime? ReportStartDate { get; set; }
@@ -118,7 +116,7 @@ namespace Borsdata.Api.Dal.Model
         public bool Broken_Fiscal_Year { get; set; }
 
 
-        // New propertys 2020-10-21
+        // New properties 2020-10-21
         [JsonProperty(PropertyName = "currency_Ratio")]
         public double? Currency_Ratio { get; set; }
 
@@ -128,5 +126,4 @@ namespace Borsdata.Api.Dal.Model
         [JsonProperty(PropertyName = "report_Date")]
         public DateTime Report_Date { get; set; }
     }
-
 }

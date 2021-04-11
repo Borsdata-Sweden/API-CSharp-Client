@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Linq;
 using System.IO;
@@ -13,8 +11,7 @@ using Newtonsoft.Json;
 
 namespace Borsdata.Api.Dal.Model
 {
- 
-    public partial class ReportQuarterV1 
+    public partial class ReportQuarterV1
     {
         [JsonProperty(PropertyName = "year")]
         public int Year { get; set; }
@@ -119,7 +116,7 @@ namespace Borsdata.Api.Dal.Model
         public bool Broken_Fiscal_Year { get; set; }
 
 
-        // New propertys 2020-10-21
+        // New properties 2020-10-21
         [JsonProperty(PropertyName = "currency_Ratio")]
         public double? Currency_Ratio { get; set; }
 
@@ -128,8 +125,5 @@ namespace Borsdata.Api.Dal.Model
 
         [JsonProperty(PropertyName = "report_Date")]
         public DateTime Report_Date { get; set; }
-
-
     }
-
 }
