@@ -24,6 +24,9 @@ In Program.cs you replace xxxx with your uniqe API Key.
 - Add new report values
 - Add 20 year history querystring
 
+2024-02-19 
+- Added new flags. Original
+
 Happy coding!  
 
 
