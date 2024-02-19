@@ -26,7 +26,9 @@ namespace Borsdata.Api.Dal.Model
         public long? BranchId { get; set; }
         public long? CountryId { get; set; }
         public DateTime? ListingDate { get; set; }
-
+        public string StockPriceCurrency { get; set; }
+        public string ReportCurrency { get; set; }
+        
         [JsonIgnore]
         public SectorV1 SectorModel { get; set; }
 

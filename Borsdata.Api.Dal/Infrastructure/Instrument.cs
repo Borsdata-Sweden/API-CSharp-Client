@@ -10,9 +10,17 @@ namespace Borsdata.Api.Dal.Infrastructure
     {
         Stocks = 0,
         Pref = 1,
-        Index = 2,
+        NordicIndex = 2,
         Stocks2 = 3,
         SectorIndex = 4,
-        BranschIndex = 5
+        BranschIndex = 5,
+        Currency = 6,
+        Commodity = 7,
+        SPAC = 8,
+        ADR = 9,
+        Unit = 10,
+        GlobalIndex = 11,
+        Cryptocurrencies = 12,
+        NordicOtherIndex = 13
     }
 }

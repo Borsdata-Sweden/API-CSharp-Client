@@ -14,20 +14,19 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// Sample class to call Borsdata API V1.
-/// The rate limit logic only work with single thread.
 /// </summary>
 namespace Borsdata.Api.Dal
 {
     public class ApiClient : IDisposable
     {
         HttpClient _client;
-        string _authKey;                // Query string authKey
-        Stopwatch _timer;               // Check time from last API call to check rate limit
+        string _querystring;                // Query string authKey
+        Stopwatch _timer;                   // Check time from last API call to check rate limit
         string _urlRoot;
 
         public ApiClient(string apiKey)
         {
-            _authKey = "?authKey=" + apiKey + "&maxcount=20";
+            _querystring = "?authKey=" + apiKey;
 
             _timer = Stopwatch.StartNew();
             _urlRoot = "https://apiservice.borsdata.se/";
@@ -36,8 +35,8 @@ namespace Borsdata.Api.Dal
         /// <summary> Return list of all instruments</summary>
         public InstrumentRespV1 GetInstruments()
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/instruments";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -54,10 +53,13 @@ namespace Borsdata.Api.Dal
         }
 
         /// <summary> Return list of all reports for one instrument</summary>
-        public ReportsRespV1 GetReports(long instrumentId)
+        public ReportsRespV1 GetReports(long instrumentId, int maxYearCount = 20, int maxR12QCount = 20, int original = 0)
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/{0}/reports", instrumentId);
-            HttpResponseMessage response = WebbCall(url, _authKey);
+
+            string url = $"{_urlRoot}/v1/instruments/{instrumentId}/reports";
+            string query = $"{_querystring}&maxYearCount={maxYearCount}&maxR12QCount={maxR12QCount}&original={original}";
+
+            HttpResponseMessage response = WebbCall(url, query);
 
             if (response.IsSuccessStatusCode)
             {
@@ -74,10 +76,12 @@ namespace Borsdata.Api.Dal
         }
 
         /// <summary> Return full year reports for one instrument (max 10 reports)</summary>
-        public ReportsYearRespV1 GetReportsYear(long instrumentId)
+        public ReportsYearRespV1 GetReportsYear(long instrumentId, int maxcount = 20, int original = 0)
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/{0}/reports/year", instrumentId);
-            HttpResponseMessage response = WebbCall(url, _authKey);
+    
+            string url = $"{_urlRoot}/v1/instruments/{instrumentId}/reports/year";
+            string query = $"{_querystring}&maxcount={maxcount}&original={original}";
+            HttpResponseMessage response = WebbCall(url, query);
 
             if (response.IsSuccessStatusCode)
             {
@@ -94,10 +98,12 @@ namespace Borsdata.Api.Dal
         }
 
         /// <summary> Return R12 reports (Rolling 12 month => Sum of last four quarter reports) for one instrument (max 10 reports)</summary>
-        public ReportsR12RespV1 GetReportsR12(long instrumentId)
+        public ReportsR12RespV1 GetReportsR12(long instrumentId, int maxcount = 20, int original = 0)
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/{0}/reports/r12", instrumentId);
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/instruments/{instrumentId}/reports/r12";
+            string query = $"{_querystring}&maxcount={maxcount}&original={original}";
+
+            HttpResponseMessage response = WebbCall(url, query);
 
             if (response.IsSuccessStatusCode)
             {
@@ -113,11 +119,13 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-        /// <summary> Return quarterly reports (Normally data for last 3 months) for one instrument (max 10 reports)</summary>
-        public ReportsQuarterRespV1 GetReportsQuarter(long instrumentId)
+        /// <summary> Return quarterly reports (Normally data for last 3 months) for one instrument</summary>
+        public ReportsQuarterRespV1 GetReportsQuarter(long instrumentId, int maxcount=20, int original=0)
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/{0}/reports/quarter", instrumentId);
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/instruments/{instrumentId}/reports/quarter";
+            string query = $"{_querystring}&maxcount={maxcount}&original={original}";
+
+            HttpResponseMessage response = WebbCall(url, query);
 
             if (response.IsSuccessStatusCode)
             {
@@ -133,11 +141,12 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-        /// <summary> Return end day stock price for one instrument (max 10 year history)</summary>
+        /// <summary> Return end day stock price for one instrument</summary>
         public StockPricesRespV1 GetStockPrices(long instrumentId)
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/{0}/stockprices", instrumentId);
-            HttpResponseMessage response = WebbCall(url, _authKey);
+
+            string url = $"{_urlRoot}/v1/instruments/{instrumentId}/stockprices";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -153,12 +162,13 @@ namespace Borsdata.Api.Dal
             return null;
         }
 
-        /// <summary> Return end day stock price for one instrument (max 10 year history)</summary>
+        /// <summary> Return end day stock price for one instrument</summary>
         public StockPricesRespV1 GetStockPrices(long instrumentId, DateTime from, DateTime to)
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/{0}/stockprices", instrumentId);
-            string urlPar = string.Format(_authKey + "&from={0}&to={1}", from.ToShortDateString(), to.ToShortDateString());
-            HttpResponseMessage response = WebbCall(url, urlPar);
+            string url = $"{_urlRoot}/v1/instruments/{instrumentId}/stockprices";
+            string query = $"{_querystring}&from={from.ToShortDateString()}&to={to.ToShortDateString()}";
+
+            HttpResponseMessage response = WebbCall(url, query);
 
             if (response.IsSuccessStatusCode)
             {
@@ -186,9 +196,8 @@ namespace Borsdata.Api.Dal
         /// <returns>List of historical KPI values</returns>
         public KpisHistoryRespV1 GetKpiHistory(long instrumentId, int KpiId, ReportType rt, PriceType pt)
         {
-            string url = string.Format(_urlRoot + "/v1/Instruments/{0}/kpis/{1}/{2}/{3}/history", instrumentId, KpiId, rt.ToString(), pt.ToString());
-            string urlPar = string.Format(_authKey);
-            HttpResponseMessage response = WebbCall(url, urlPar);
+            string url = $"{_urlRoot}/v1/Instruments/{instrumentId}/kpis/{KpiId}/{rt}/{pt}/history";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -215,9 +224,8 @@ namespace Borsdata.Api.Dal
         /// <returns></returns>
         public KpisRespV1 GetKpiScreenerSingle(long instrumentId, int KpiId, string time, string calc)
         {
-            string url = string.Format(_urlRoot + "/v1/Instruments/{0}/kpis/{1}/{2}/{3}", instrumentId, KpiId, time, calc);
-            string urlPar = string.Format(_authKey);
-            HttpResponseMessage response = WebbCall(url, urlPar);
+            string url = $"{_urlRoot}/v1/Instruments/{instrumentId}/kpis/{KpiId}/{time}/{calc}";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -243,9 +251,8 @@ namespace Borsdata.Api.Dal
         /// <returns></returns>
         public KpisAllCompRespV1 GetKpiScreener(int KpiId, string time, string calc)
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/kpis/{0}/{1}/{2}", KpiId, time, calc);
-            string urlPar = string.Format(_authKey);
-            HttpResponseMessage response = WebbCall(url, urlPar);
+            string url = $"{_urlRoot}/v1/Instruments/kpis/{KpiId}/{time}/{calc}";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -263,8 +270,8 @@ namespace Borsdata.Api.Dal
 
         public MarketsRespV1 GetMarkets()
         {
-            string url = string.Format(_urlRoot + "/v1/markets");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/markets";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -282,8 +289,8 @@ namespace Borsdata.Api.Dal
 
         public SectorsRespV1 GetSectors()
         {
-            string url = string.Format(_urlRoot + "/v1/sectors");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/sectors";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -301,8 +308,8 @@ namespace Borsdata.Api.Dal
 
         public CountriesRespV1 GetCountries()
         {
-            string url = string.Format(_urlRoot + "/v1/countries");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/countries";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -320,8 +327,8 @@ namespace Borsdata.Api.Dal
 
         public BranchesRespV1 GetBranches()
         {
-            string url = string.Format(_urlRoot + "/v1/branches");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/branches";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -343,8 +350,9 @@ namespace Borsdata.Api.Dal
         /// <returns></returns>
         public InstrumentsUpdatedRespV1 GetInstrumentsUpdated()
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/updated");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+           
+            string url = $"{_urlRoot}/v1/instruments/updated";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -368,8 +376,8 @@ namespace Borsdata.Api.Dal
         /// <returns></returns>
         public KpisCalcUpdatedRespV1 GetKpisCalcUpdated()
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/kpis/updated");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/instruments/kpis/updated";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -391,8 +399,8 @@ namespace Borsdata.Api.Dal
         /// </summary>
         public StockSplitRespV1 GetStockSplits()
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/StockSplits");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/instruments/StockSplits";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -411,8 +419,8 @@ namespace Borsdata.Api.Dal
         /// <summary> Return list of last Stockprice for all instruments</summary>
         public StockPricesLastRespV1 GetStockpricesLast()
         {
-            string url = string.Format(_urlRoot + "/v1/instruments/stockprices/last");
-            HttpResponseMessage response = WebbCall(url, _authKey);
+            string url = $"{_urlRoot}/v1/instruments/stockprices/last";
+            HttpResponseMessage response = WebbCall(url, _querystring);
 
             if (response.IsSuccessStatusCode)
             {
@@ -441,14 +449,11 @@ namespace Borsdata.Api.Dal
             _client.BaseAddress = new Uri(url);
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            SleepBeforeNewApiCall(); // Sleep if needed to avoid RateLimit
             HttpResponseMessage response = _client.GetAsync(querystring).Result; // Call API
+            Console.WriteLine(url + querystring);
 
-            Console.WriteLine(url + " " + querystring);
-
-            if ((int)response.StatusCode == 429) // We still get RateLimit error. Sleep more.
+            if ((int)response.StatusCode == 429) // We get RateLimit error. Sleep.
             {
-                //Console.WriteLine("StatusCode == 429.. Sleep more!!");
                 System.Threading.Thread.Sleep(500);
                 response = _client.GetAsync(querystring).Result; // Call API second time!
             }
@@ -456,22 +461,6 @@ namespace Borsdata.Api.Dal
             return response;
         }
 
-        /// <summary>
-        /// Rate limit to API is 2 req/sec.
-        /// Check if the time since last API call is less than 500ms.
-        /// Then sleep to avoid rate limit 429.
-        /// </summary>
-        void SleepBeforeNewApiCall()
-        {
-            _timer.Stop();
-            if (_timer.ElapsedMilliseconds < 500)
-            {
-                int sleepms = 550 - (int)_timer.ElapsedMilliseconds; // Add 50 extra ms.
-                Console.WriteLine("Sleep before new API call ms:" + sleepms);
-                System.Threading.Thread.Sleep(sleepms);
-            }
-            _timer.Restart();
-        }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

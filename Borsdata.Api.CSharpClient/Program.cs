@@ -3,12 +3,19 @@
 // Börsdata cannot guarantee or imply reliability, serviceability, or function of these programs.
 // All programs contained herein are provided to you “AS IS” without any warranties of any kind.
 
+// Not all API functions is added.
+
 
 // -------------------
 // Update 2020-10-21
 // Added maxcount for 20 years data
 // Added new Report values
+//
+// Update 2024-02-19
+// Added new flags. Original
 // -------------------
+
+
 
 
 using Borsdata.Api.Dal;
@@ -21,7 +28,7 @@ namespace Borsdata.Api.SimpleClient
 {
     class Program
     {
-        static string _apiKey = "xxx"; // Add your API Key.
+        static string _apiKey = "YOUR APIKEY"; // Add your API Key.
 
         static void Main(string[] args)
         {
@@ -32,18 +39,18 @@ namespace Borsdata.Api.SimpleClient
             //LastStockPricesForAllInstruments();
 
             //StockPricesForAllInstruments();
-            //InstrumentsWithMetadata();
-            //StockPricesTimeRange();
+            InstrumentsWithMetadata();
+            StockPricesTimeRange();
 
-            //Reports();
-            //LatestPE();
+            Reports();
+            LatestPE();
 
-            //HistoryKpi();
-            //ScreenerKpi();
+            HistoryKpi();
+            ScreenerKpi();
 
-            //InstrumentsUpdated();
-            //KpisUpdated();
-            //GetStockSplits();
+            InstrumentsUpdated();
+            KpisUpdated();
+            GetStockSplits();
 
             Console.ReadKey();
         }
@@ -82,7 +89,7 @@ namespace Borsdata.Api.SimpleClient
             // Print data to see all is OK
             foreach (InstrumentV1 c in inst.Instruments)
             {
-                if (c.Instrument == Instrument.Index) // Index don't have any Branch or Sector
+                if (c.Instrument != Instrument.Stocks) // Index don't have any Branch or Sector
                 {
                     Console.WriteLine(c.Name + " : " + c.CountryModel.Name + " : " + c.MarketModel.Name);
                 }
@@ -170,28 +177,52 @@ namespace Borsdata.Api.SimpleClient
             ReportsR12RespV1 r12 = api.GetReportsR12(3);
             Console.WriteLine("r12 count: " + r12.Reports.Count());
 
-            ReportsQuarterRespV1 rQ = api.GetReportsQuarter(3);
+            // Select number count and if original reportdata
+            ReportsQuarterRespV1 rQ = api.GetReportsQuarter(750,3,0);
             Console.WriteLine("Quarter count: " + rQ.Reports.Count());
+
+            ReportsQuarterRespV1 rQ2 = api.GetReportsQuarter(750, 3, 1);
+            Console.WriteLine("Quarter count: " + rQ2.Reports.Count());
 
         }
 
+
         /// <summary>
-        /// Calculate latest P/E for HM
+        /// Calculate latest P/E 
         /// Sample to calculate my own KPI
+        /// Currency_Ratio convert Report values to Stockprice Currency
         /// </summary>
         static void LatestPE()
         {
             ApiClient api = new ApiClient(_apiKey);
-            int insId = 97; // HM
+            int insId = 750; // Evolution
+            bool originalReportdata = false; // Return data in original report currency ?
 
             StockPricesRespV1 spResp = api.GetStockPrices(insId, DateTime.Today.AddDays(-7), DateTime.Today); // We need lastest price. Ask for one week back.
             StockPriceV1 lastSp = spResp.StockPricesList.Last(); // First in list in latest stock price. (Order asc)
 
-            ReportsR12RespV1 r12 = api.GetReportsR12(insId);
-            ReportR12V1 lastReport = r12.Reports.First(); // Get last R12 report (Desc)
+            if (originalReportdata==false)
+            {
+                ReportsR12RespV1 r12 = api.GetReportsR12(insId, 5, original:0);
+                ReportR12V1 lastReport = r12.Reports.First(); // Get last R12 report (Desc)
 
-            var pe = lastSp.C / lastReport.EarningsPerShare;
-            Console.WriteLine("Lastest R12 P/E is : " + pe);
+                //  closeprice / Epa 
+                var pe = lastSp.C / (lastReport.EarningsPerShare);
+                Console.WriteLine("Latest R12 P/E is : " + pe);
+            }
+            else 
+            {
+                // If we get original report currency we must convert report data to Stockprice currency before Calc Kpis. [Currency_Ratio]
+
+                ReportsR12RespV1 r12 = api.GetReportsR12(insId, 5, original: 1);
+                ReportR12V1 lastReport = r12.Reports.First(); // Get last R12 report (Desc)
+
+                //  closeprice / EPS 
+                var pe = lastSp.C / (lastReport.EarningsPerShare * lastReport.Currency_Ratio);
+                Console.WriteLine("Latest R12 P/E is : " + pe);
+            }
+
+
         }
 
         /// <summary> Get list of last 100 updated instruments where instrument data or instrument reports is changed.</summary>

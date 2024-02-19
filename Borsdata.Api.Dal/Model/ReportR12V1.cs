@@ -124,6 +124,6 @@ namespace Borsdata.Api.Dal.Model
         public double? Net_Sales { get; set; }
 
         [JsonProperty(PropertyName = "report_Date")]
-        public DateTime Report_Date { get; set; }
+        public DateTime? Report_Date { get; set; }
     }
 }
