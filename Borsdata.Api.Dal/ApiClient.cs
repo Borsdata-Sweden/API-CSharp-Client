@@ -2,15 +2,11 @@
 using Borsdata.Api.Dal.Model;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Threading.Tasks;
+
 
 /// <summary>
 /// Sample class to call Borsdata API V1.
@@ -19,17 +15,20 @@ namespace Borsdata.Api.Dal
 {
     public class ApiClient : IDisposable
     {
-        HttpClient _client;
+        HttpClient _client;                 // Important to NOT create new obj for each call. (Read docs about HttpClient) 
         string _querystring;                // Query string authKey
         Stopwatch _timer;                   // Check time from last API call to check rate limit
         string _urlRoot;
 
         public ApiClient(string apiKey)
         {
-            _querystring = "?authKey=" + apiKey;
+            _client = new HttpClient(); // Declare once.
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+            _querystring = "?authKey=" + apiKey;
             _timer = Stopwatch.StartNew();
-            _urlRoot = "https://apiservice.borsdata.se/";
+            //_urlRoot = "https://apiservice.borsdata.se";
+            _urlRoot = "https://bd-apimanager-dev.azure-api.net";
         }
 
         /// <summary> Return list of all instruments</summary>
@@ -207,7 +206,7 @@ namespace Borsdata.Api.Dal
             }
             else
             {
-                Console.WriteLine("GetStockPrices time {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                Console.WriteLine("GetKpiHistory time {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
             }
 
             return null;
@@ -235,7 +234,7 @@ namespace Borsdata.Api.Dal
             }
             else
             {
-                Console.WriteLine("GetStockPrices time {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                Console.WriteLine("GetKpiScreenerSingle time {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
             }
 
             return null;
@@ -262,7 +261,7 @@ namespace Borsdata.Api.Dal
             }
             else
             {
-                Console.WriteLine("GetStockPrices time {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                Console.WriteLine("GetKpiScreener time {0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
             }
 
             return null;
@@ -437,28 +436,37 @@ namespace Borsdata.Api.Dal
         }
 
         /// <summary>
-        /// Combine URL and query string. Check if need to sleep (rate limit). Then call API.
-        /// It tries to call API 2 times if rate limit is hit.
+        /// Combine URL and query string. Check if 429 (rate limit).
+        /// It tries to call API 2 times if rate limit is hit. This logic is ugly and only to demonstrate. 
+        /// You schould use Polly or similar.
         /// </summary>
         /// <param name="url">API url</param>
         /// <param name="querystring">Querystring</param>
         /// <returns></returns>
         HttpResponseMessage WebbCall(string url, string querystring)
         {
-            _client = new HttpClient();
-            _client.BaseAddress = new Uri(url);
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            HttpResponseMessage response = _client.GetAsync(querystring).Result; // Call API
+            var w1 = Stopwatch.StartNew();    
+            HttpResponseMessage response = _client.GetAsync(url+querystring).Result; // Call API
             Console.WriteLine(url + querystring);
 
-            if ((int)response.StatusCode == 429) // We get RateLimit error. Sleep.
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                throw new Exception("Not authorized");
+
+            if (response.StatusCode == HttpStatusCode.TooManyRequests) // We get RateLimit error. Sleep.
             {
-                System.Threading.Thread.Sleep(500);
-                response = _client.GetAsync(querystring).Result; // Call API second time!
+                int sleepMs = (int)response.Headers.RetryAfter.Delta.Value.TotalMilliseconds; // Check header for time to wait (ms).
+                Console.WriteLine($"Ratelimit sleep ms:{sleepMs}");
+                System.Threading.Thread.Sleep(sleepMs);
+                response = _client.GetAsync(url + querystring).Result; // Call API again
+
+                if ((int)response.StatusCode == 429)
+                    throw new Exception("Ratelimit hit twice!");
             }
 
+            w1.Stop();
+            //Console.WriteLine($"WebbCall : {url + querystring} ms: {w1.ElapsedMilliseconds}");
             return response;
+
         }
 
 

@@ -5,6 +5,8 @@
 
 // Not all API functions is added.
 
+// Docs
+// https://github.com/Borsdata-Sweden/API/wiki
 
 // -------------------
 // Update 2020-10-21
@@ -13,6 +15,9 @@
 //
 // Update 2024-02-19
 // Added new flags. Original
+
+// 2024-07-09 Upgrade to NET8
+// Updated retrylogic from header
 // -------------------
 
 
@@ -28,32 +33,39 @@ namespace Borsdata.Api.SimpleClient
 {
     class Program
     {
-        static string _apiKey = "YOUR APIKEY"; // Add your API Key.
+        static string _apiKey = "API KEY"; // Add your API Key.
+
 
         static void Main(string[] args)
         {
             Console.WriteLine("Start Test Client!!");
+
 
             StockPricesForOneInstruments(3); // Get stockprices for ABB (InsId=3)
 
             //LastStockPricesForAllInstruments();
 
             //StockPricesForAllInstruments();
-            InstrumentsWithMetadata();
-            StockPricesTimeRange();
+            //InstrumentsWithMetadata();
+            //StockPricesTimeRange();
 
-            Reports();
-            LatestPE();
+            //Reports();
+            //LatestPE();
 
-            HistoryKpi();
-            ScreenerKpi();
+            //HistoryKpi();
+            //ScreenerKpi();
 
-            InstrumentsUpdated();
-            KpisUpdated();
-            GetStockSplits();
+            //InstrumentsUpdated();
+            //KpisUpdated();
+            //GetStockSplits();
+            //testHistory();
+
 
             Console.ReadKey();
         }
+
+
+
 
         /// <summary> Get all meta data about instruments and connect data to instrument object.</summary>
         static void InstrumentsWithMetadata()
@@ -236,6 +248,7 @@ namespace Borsdata.Api.SimpleClient
         /// <summary>
         /// Test get some historical KPIs
         /// This gives history values for one KPI
+        /// https://github.com/Borsdata-Sweden/API/wiki/KPI-History
         /// </summary>
         static void HistoryKpi()
         {
@@ -245,6 +258,10 @@ namespace Borsdata.Api.SimpleClient
             var kpis = api.GetKpiHistory(3, 2, ReportType.year, PriceType.mean);
         }
 
+        /// <summary>
+        /// Get last value from screener
+        /// https://github.com/Borsdata-Sweden/API/wiki/KPI-Screener
+        /// </summary>
         static void ScreenerKpi()
         {
             ApiClient api = new ApiClient(_apiKey);
@@ -277,6 +294,25 @@ namespace Borsdata.Api.SimpleClient
 
             StockSplitRespV1 splits = api.GetStockSplits();
             Console.WriteLine("StockSplits count: " + splits.stockSplitList.Count());
+        }
+
+        /// <summary>
+        /// Speed test
+        /// https://github.com/Borsdata-Sweden/API/wiki/KPI-History
+        /// </summary>
+        static void testHistory()
+        {
+            ApiClient api = new ApiClient(_apiKey);
+            InstrumentRespV1 inst = api.GetInstruments();
+
+            foreach (var c in inst.Instruments)
+            {
+                var kpis1 = api.GetKpiHistory(c.InsId.Value, 2, ReportType.year, PriceType.mean);
+                var kpis2 = api.GetKpiHistory(c.InsId.Value, 2, ReportType.r12, PriceType.mean);
+
+                var kpis3 = api.GetKpiHistory(c.InsId.Value, 3, ReportType.year, PriceType.mean);
+                var kpis4 = api.GetKpiHistory(c.InsId.Value, 3, ReportType.r12, PriceType.mean);
+            }
         }
     }
 }

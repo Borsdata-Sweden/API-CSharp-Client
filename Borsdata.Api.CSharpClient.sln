@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Borsdata.Api.CSharpClient", "Borsdata.Api.CSharpClient\Borsdata.Api.CSharpClient.csproj", "{6740C2DE-2476-44DF-80E1-171A92197D60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Borsdata.Api.CSharpClient", "Borsdata.Api.CSharpClient\Borsdata.Api.CSharpClient.csproj", "{6740C2DE-2476-44DF-80E1-171A92197D60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Borsdata.Api.Dal", "Borsdata.Api.Dal\Borsdata.Api.Dal.csproj", "{2A790AF0-B68B-47D4-89ED-5011E1549B7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Borsdata.Api.Dal", "Borsdata.Api.Dal\Borsdata.Api.Dal.csproj", "{2A790AF0-B68B-47D4-89ED-5011E1549B7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
