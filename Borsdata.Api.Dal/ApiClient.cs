@@ -27,8 +27,7 @@ namespace Borsdata.Api.Dal
 
             _querystring = "?authKey=" + apiKey;
             _timer = Stopwatch.StartNew();
-            //_urlRoot = "https://apiservice.borsdata.se";
-            _urlRoot = "https://bd-apimanager-dev.azure-api.net";
+            _urlRoot = "https://apiservice.borsdata.se";
         }
 
         /// <summary> Return list of all instruments</summary>
